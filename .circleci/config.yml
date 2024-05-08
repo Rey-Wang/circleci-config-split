@@ -49,10 +49,10 @@ jobs:
       - path-filtering/set-parameters:
           base-revision: main
           mapping: |
-            .* config ".circleci/pants_config.yml"
-            src/web/.* config ".circleci/web_config.yml"
-      - set-continued-config:
-          lookup-key: config
+            .* config ".circleci/pants_config.yml" .circleci/pants_config.yml
+            src/web/.* config ".circleci/web_config.yml" .circleci/web_config.yml
+      # - set-continued-config:
+      #     lookup-key: config
       - continuation/continue:
           configuration_path: .circleci/continue.yml
           parameters: /tmp/pipeline-parameters.json
