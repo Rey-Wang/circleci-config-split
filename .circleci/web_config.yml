@@ -1,0 +1,19 @@
+version: 2.1
+
+parameters:
+  message:
+    type: string
+    default: ''
+
+jobs:
+  web_build:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run: echo "web config"
+
+workflows:
+  web_build_workflow:
+    jobs:
+      - web_build
