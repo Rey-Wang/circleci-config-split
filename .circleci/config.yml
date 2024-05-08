@@ -55,7 +55,7 @@ jobs:
           base-revision: main
           mapping: |
             .* pants_config ".circleci/pants_config.yml"
-            src/web/.* pants_config ".circleci/web_config.yml"
+            src/web/.* web_config ".circleci/web_config.yml"
       - debug
       # - set-continued-config:
       #     lookup-key: config
