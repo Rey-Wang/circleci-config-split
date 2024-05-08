@@ -7,6 +7,11 @@ orbs:
   continuation: circleci/continuation@1.0.0
 
 commands:
+  debug:
+    steps:
+      - run:
+          command: |
+            cat /tmp/pipeline-parameters.json
   set-continued-config:
     parameters:
       pipeline-parameters-json-file:
@@ -51,6 +56,7 @@ jobs:
           mapping: |
             .* config ".circleci/pants_config.yml" .circleci/pants_config.yml
             src/web/.* config ".circleci/web_config.yml" .circleci/web_config.yml
+      - debug
       # - set-continued-config:
       #     lookup-key: config
       - continuation/continue:
