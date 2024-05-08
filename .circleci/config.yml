@@ -54,8 +54,8 @@ jobs:
       - path-filtering/set-parameters:
           base-revision: main
           mapping: |
-            .* config ".circleci/pants_config.yml" .circleci/pants_config.yml
-            src/web/.* config ".circleci/web_config.yml" .circleci/web_config.yml
+            .* pants_config ".circleci/pants_config.yml"
+            src/web/.* pants_config ".circleci/web_config.yml"
       - debug
       # - set-continued-config:
       #     lookup-key: config
