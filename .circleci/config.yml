@@ -53,16 +53,16 @@ commands:
 
             cat << parameters.continue-config >>
 
-jobs:
-  filter:
-    docker:
-      - image: cimg/python:3.9
-    steps:
-      - checkout
-      - path-filtering/filter:
-          mapping: |
-            .* params test .circleci/pants_config.yml
-            src/web/.* params test .circleci/web_config.yml
+# jobs:
+#   filter:
+#     docker:
+#       - image: cimg/python:3.9
+#     steps:
+#       - checkout
+#       - path-filtering/filter:
+#           mapping: |
+#             .* params test .circleci/pants_config.yml
+#             src/web/.* params test .circleci/web_config.yml
       # - run:
       #     name: Install yq
       #     command: pip install yq
@@ -78,6 +78,9 @@ jobs:
       #     configuration_path: .circleci/continue-config.yml
 
 workflows:
-  setup:
+  generate-configs:
     jobs:
-      - filter
+      - path-filtering/filter:
+          mapping: |
+            .* params "test" .circleci/pants_config.yml
+            src/web/.* params "test" .circleci/web_config.yml
