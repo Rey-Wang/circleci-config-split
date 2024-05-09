@@ -82,5 +82,5 @@ workflows:
     jobs:
       - path-filtering/filter:
           mapping: |
-            .* params "test" .circleci/pants_config.yml
-            src/web/.* params "test" .circleci/web_config.yml
+            .* deps "test" .circleci/pants_config.yml
+            src/web/.* deps "test" .circleci/web_config.yml
