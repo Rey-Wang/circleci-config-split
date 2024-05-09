@@ -23,7 +23,7 @@ commands:
       - run:
           name: Format mapping
           command: |
-            ori_mapping=<< parameters.mapping >>
+            ori_mapping="<< parameters.mapping >>"
 
             echo "$ori_mapping" | awk '{print $1 " config_" $1 " " $2}' > << parameters.output_file >>
 
