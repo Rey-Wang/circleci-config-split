@@ -91,14 +91,13 @@ jobs:
           command: pip install yq
       - format-mapping:
           mapping: |
-            .* pants_config.yml
+            .* .circleci/pants_config.yml
             scripts/.* .circleci/pants_config.yml,.circleci/web_config.yml
-            src/web/.* web_config.yml
+            src/web/.* .circleci/web_config.yml
       - path-filtering/set-parameters:
           base-revision: main
           mapping: /tmp/format-mapping.conf
       - extract-config-list
-      - merge-config-list
       - run:
           name: debug
           command: |
@@ -107,6 +106,7 @@ jobs:
             echo "##############"
 
             cat /tmp/filtered-config-list.conf
+      - merge-config-list
       # - continuation/continue:
       #     configuration_path: .circleci/continue-config.yml
 
