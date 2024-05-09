@@ -56,7 +56,7 @@ commands:
 
             # If there's more than one value, remove the config_.* key
             if [ "$num_values" -gt 1 ]; then
-              jq 'del(.["console_.*"] )' "$INPUT_JSON_FILE" > temp.json
+              jq 'del(.["config_.*"] )' "$INPUT_JSON_FILE" > temp.json
               mv temp.json "$INPUT_JSON_FILE"
             fi
 
