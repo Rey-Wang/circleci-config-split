@@ -2,9 +2,9 @@ version: 2.1
 
 setup: true
 
-orbs:
-  path-filtering: circleci/path-filtering@1.0.0
-  continuation: circleci/continuation@1.0.0
+# orbs:
+#   path-filtering: circleci/path-filtering@1.0.0
+#   continuation: circleci/continuation@1.0.0
 
 commands:
   debug:
@@ -60,19 +60,23 @@ jobs:
       - image: cimg/python:3.9
     steps:
       - checkout
-      - run:
-          name: Install yq
-          command: pip install yq
-      - path-filtering/set-parameters:
-          base-revision: main
+      - path-filtering/filter:
           mapping: |
-            .* pants_config ".circleci/pants_config.yml"
-            src/web/.* web_config ".circleci/web_config.yml"
-      - debug
-      - extract-config-list
-      - merge-config-list
-      - continuation/continue:
-          configuration_path: .circleci/continue-config.yml
+            .* params test .circleci/pants_config.yml
+            src/web/.* params test ".circleci/web_config.yml"
+      # - run:
+      #     name: Install yq
+      #     command: pip install yq
+      # - path-filtering/set-parameters:
+      #     base-revision: main
+      #     mapping: |
+      #       .* pants_config ".circleci/pants_config.yml"
+      #       src/web/.* web_config ".circleci/web_config.yml"
+      # - debug
+      # - extract-config-list
+      # - merge-config-list
+      # - continuation/continue:
+      #     configuration_path: .circleci/continue-config.yml
 
 workflows:
   setup:
