@@ -83,4 +83,6 @@ workflows:
       - path-filtering/filter:
           mapping: |
             .* message "test" .circleci/pants_config.yml
+      - path-filtering/filter:
+          mapping: |
             src/web/.* message "test" .circleci/web_config.yml
