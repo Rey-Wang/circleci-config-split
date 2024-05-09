@@ -33,7 +33,7 @@ commands:
 
             trimmed_mapping=$(trim "$mapping")
 
-            echo "$trimmed_mapping" | awk '{print $1 " config_" $1 " " $2}' > << parameters.output_file >>
+            echo "$trimmed_mapping" | awk '{print $1 " config_" $1 " \"" $2 "\""}' > << parameters.output_file >>
 
             cat << parameters.output_file >>
   extract-config-list:
