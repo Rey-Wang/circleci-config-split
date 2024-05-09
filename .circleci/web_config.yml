@@ -14,6 +14,6 @@ jobs:
       - run: echo "web config"
 
 workflows:
-  build_workflow:
+  web_build_workflow:
     jobs:
       - web_build
