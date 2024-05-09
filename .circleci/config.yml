@@ -31,7 +31,7 @@ commands:
               echo "$var"
             }
 
-            trimmed_mapping=$(trim mapping)
+            trimmed_mapping=$(trim "$mapping")
 
             echo "$trimmed_mapping" | awk '{print $1 " config_" $1 " " $2}' > << parameters.output_file >>
 
