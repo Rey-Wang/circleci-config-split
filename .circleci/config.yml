@@ -23,9 +23,17 @@ commands:
       - run:
           name: Format mapping
           command: |
-            ori_mapping="<< parameters.mapping >>"
+            mapping="<< parameters.mapping >>"
 
-            echo "$ori_mapping" | awk '{print $1 " config_" $1 " " $2}' > << parameters.output_file >>
+            trim() {
+              local var="${1#"${1%%[![:space:]]*}"}"
+              var="${var%"${var##*[![:space:]]}"}"
+              echo "$var"
+            }
+
+            trimmed_mapping=$(trim mapping)
+
+            echo "$trimmed_mapping" | awk '{print $1 " config_" $1 " " $2}' > << parameters.output_file >>
 
             cat << parameters.output_file >>
   extract-config-list:
