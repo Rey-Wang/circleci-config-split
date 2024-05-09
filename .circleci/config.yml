@@ -106,8 +106,8 @@ jobs:
 
             cat /tmp/filtered-config-list.conf
       - merge-config-list
-      # - continuation/continue:
-      #     configuration_path: .circleci/continue-config.yml
+      - continuation/continue:
+          configuration_path: .circleci/continue-config.yml
 
 workflows:
   generate-configs:
