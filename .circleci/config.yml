@@ -63,7 +63,7 @@ jobs:
       - path-filtering/filter:
           mapping: |
             .* params test .circleci/pants_config.yml
-            src/web/.* params test ".circleci/web_config.yml"
+            src/web/.* params test .circleci/web_config.yml
       # - run:
       #     name: Install yq
       #     command: pip install yq
