@@ -24,8 +24,8 @@ commands:
       - run:
           name: Extract config list
           command: |
-            INPUT_JSON_FILE = <<parameters.pipeline-parameters-json-file>>
-            OUTPUT_FILE = <<parameters.config-list-path>>
+            INPUT_JSON_FILE=<<parameters.pipeline-parameters-json-file>>
+            OUTPUT_FILE=<<parameters.config-list-path>>
 
             if [ ! -f "$INPUT_JSON_FILE" ]; then
               echo "Input JSON file does not exist: $INPUT_JSON_FILE"
