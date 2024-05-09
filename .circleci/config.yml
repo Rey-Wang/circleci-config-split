@@ -18,26 +18,26 @@ commands:
         type: string
         default: /tmp/pipeline-parameters.json
       config-list-path:
-        default: /tmp/filtered-config-list
-        description: >
-          A file path to append config paths. Each path in this file should be
-          relative to the working directory.
         type: string
+        default: /tmp/filtered-config-list
     steps:
       - run:
           name: Extract config list
           command: |
-            if [ ! -f <<parameters.pipeline-parameters-json-file>> ]; then
-              echo "Input JSON file does not exist: <<parameters.pipeline-parameters-json-file>>
+            INPUT_JSON_FILE = <<parameters.pipeline-parameters-json-file>>
+            OUTPUT_FILE = <<parameters.config-list-path>>
+
+            if [ ! -f "$INPUT_JSON_FILE" ]; then
+              echo "Input JSON file does not exist: $INPUT_JSON_FILE"
               exit 1
             fi
 
             # 使用 jq 提取 JSON 文件中的所有值，并逐行输出到输出文件中
-            jq -r '.. | scalars' <<parameters.pipeline-parameters-json-file>> > <<parameters.config-list-path>>
+            jq -r '.. | scalars' "$INPUT_JSON_FILE" > "$OUTPUT_FILE"
 
             echo "Values extracted from JSON file and saved to $OUTPUT_FILE"
 
-            cat <<parameters.config-list-path>>
+            cat "$OUTPUT_FILE"
   set-continued-config:
     parameters:
       pipeline-parameters-json-file:
