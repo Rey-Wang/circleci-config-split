@@ -52,7 +52,7 @@ commands:
 
             xargs -a "<<parameters.config-list-path>>" yq -y -s 'reduce .[] as $item ({}; . * $item)' | tee "<< parameters.continue-config >>"
 
-            cat(<< parameters.continue-config >>)
+            cat << parameters.continue-config >>
 
 jobs:
   filter:
