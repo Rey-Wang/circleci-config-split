@@ -18,14 +18,14 @@ commands:
         type: string
         default: /tmp/pipeline-parameters.json
       config-list-path:
-        type: string
         default: /tmp/filtered-config-list
+        type: string
     steps:
       - run:
           name: Extract config list
           command: |
-            INPUT_JSON_FILE=<<parameters.pipeline-parameters-json-file>>
-            OUTPUT_FILE=<<parameters.config-list-path>>
+            INPUT_JSON_FILE = <<parameters.pipeline-parameters-json-file>>
+            OUTPUT_FILE = <<parameters.config-list-path>>
 
             if [ ! -f "$INPUT_JSON_FILE" ]; then
               echo "Input JSON file does not exist: $INPUT_JSON_FILE"
@@ -38,45 +38,32 @@ commands:
             echo "Values extracted from JSON file and saved to $OUTPUT_FILE"
 
             cat "$OUTPUT_FILE"
-  set-continued-config:
+  merge-config-list:
     parameters:
-      pipeline-parameters-json-file:
+      config-list-path:
+        default: /tmp/filtered-config-list
         type: string
-        default: /tmp/pipeline-parameters.json
-      configuration-path:
+      continue-config:
         type: string
-        default: .circleci/continue.yml
-      lookup-key:
-        type: string
-        description: key to look up the filepath for the next config
+        default: .circleci/continue-config.yml
     steps:
       - run:
-          name: Set next config as << parameters.configuration-path >>
+          name: Merge config list
           command: |
-            # debug: confirm parameters json file
 
-            cat << parameters.pipeline-parameters-json-file >>
+            xargs -a "<<parameters.config-list-path>>" yq -y -s 'reduce .[] as $item ({}; . * $item)' | tee "<< parameters.continue-config >>"
 
-            cp $(jq -r '.<< parameters.lookup-key >>' << parameters.pipeline-parameters-json-file >>) << parameters.configuration-path >>
-
-            # debug: confirm next config
-            cat << parameters.configuration-path >>
-      - run:
-          name: Pop << parameters.lookup-key >> key from << parameters.pipeline-parameters-json-file >>
-          command: |
-            jq 'del(.<< parameters.lookup-key >>)' << parameters.pipeline-parameters-json-file >> > params.json
-            rm << parameters.pipeline-parameters-json-file >>
-            cp params.json << parameters.pipeline-parameters-json-file >>
-
-            # debug: confirm contents
-            jq '.' << parameters.pipeline-parameters-json-file >>
+            cat(<< parameters.continue-config >>)
 
 jobs:
   filter:
-    executor: path-filtering/default
-    resource_class: small
+    docker:
+      - image: cimg/python:3.9
     steps:
       - checkout
+      - run:
+          name: Install yq
+          command: pip install yq
       - path-filtering/set-parameters:
           base-revision: main
           mapping: |
@@ -84,9 +71,7 @@ jobs:
             src/web/.* web_config ".circleci/web_config.yml"
       - debug
       - extract-config-list
-      - path-filtering/generate-config
-      # - set-continued-config:
-      #     lookup-key: config
+      - merge-config-list
       - continuation/continue:
           configuration_path: .circleci/continue.yml
           parameters: /tmp/pipeline-parameters.json
