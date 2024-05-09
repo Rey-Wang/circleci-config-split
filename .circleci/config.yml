@@ -81,6 +81,4 @@ workflows:
   generate-configs:
     jobs:
       - path-filtering/filter:
-          mapping: |
-            .* message "test" .circleci/pants_config.yml
-            src/web/.* message "test" .circleci/web_config.yml
+          mapping: .circleci/mapping.conf
