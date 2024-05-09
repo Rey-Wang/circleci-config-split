@@ -7,63 +7,109 @@ orbs:
   continuation: circleci/continuation@1.0.0
 
 commands:
-  debug:
+  format-mapping:
+    parameters:
+      mapping:
+        type: string
+      output_file:
+        type: string
+        default: /tmp/format-mapping.conf
     steps:
       - run:
+          name: Format mapping
           command: |
-            cat /tmp/pipeline-parameters.json
-  set-continued-config:
+            mapping="<< parameters.mapping >>"
+
+            trim() {
+              local var="${1#"${1%%[![:space:]]*}"}"
+              var="${var%"${var##*[![:space:]]}"}"
+              echo "$var"
+            }
+
+            trimmed_mapping=$(trim "$mapping")
+
+            echo "$trimmed_mapping" | awk '{print $1 " config_" $1 " \"" $2 "\""}' > << parameters.output_file >>
+
+            cat << parameters.output_file >>
+  extract-config-list:
     parameters:
       pipeline-parameters-json-file:
         type: string
         default: /tmp/pipeline-parameters.json
-      configuration-path:
+      config-list-path:
+        default: /tmp/filtered-config-list.conf
         type: string
-        default: .circleci/continue.yml
-      lookup-key:
-        type: string
-        description: key to look up the filepath for the next config
     steps:
       - run:
-          name: Set next config as << parameters.configuration-path >>
+          name: Extract config list
           command: |
-            # debug: confirm parameters json file
+            INPUT_JSON_FILE=<<parameters.pipeline-parameters-json-file>>
+            OUTPUT_FILE=<<parameters.config-list-path>>
 
-            cat << parameters.pipeline-parameters-json-file >>
+            if [ ! -f "$INPUT_JSON_FILE" ]; then
+              echo "Input JSON file does not exist: $INPUT_JSON_FILE"
+              exit 1
+            fi
 
-            cp $(jq -r '.<< parameters.lookup-key >>' << parameters.pipeline-parameters-json-file >>) << parameters.configuration-path >>
+            values=$(jq -r 'values[]' "$INPUT_JSON_FILE")
 
-            # debug: confirm next config
-            cat << parameters.configuration-path >>
+            values=$(echo "$values" | tr ',' '\n')
+
+            echo "$values" | sort -u > "$OUTPUT_FILE"
+
+            cat "$OUTPUT_FILE"
+  merge-config-list:
+    parameters:
+      config-list-path:
+        default: /tmp/filtered-config-list.conf
+        type: string
+      continue-config:
+        type: string
+        default: .circleci/continue-config.yml
+    steps:
       - run:
-          name: Pop << parameters.lookup-key >> key from << parameters.pipeline-parameters-json-file >>
+          name: Merge config list
           command: |
-            jq 'del(.<< parameters.lookup-key >>)' << parameters.pipeline-parameters-json-file >> > params.json
-            rm << parameters.pipeline-parameters-json-file >>
-            cp params.json << parameters.pipeline-parameters-json-file >>
 
-            # debug: confirm contents
-            jq '.' << parameters.pipeline-parameters-json-file >>
+            xargs -a "<<parameters.config-list-path>>" yq -y -s 'reduce .[] as $item ({}; . * $item)' | tee "<< parameters.continue-config >>"
+
+            cat << parameters.continue-config >>
 
 jobs:
   filter:
-    executor: path-filtering/default
-    resource_class: small
+    docker:
+      - image: cimg/python:3.9
     steps:
       - checkout
+      - run:
+          name: Install yq
+          command: pip install yq
+      - format-mapping:
+          mapping: |
+            .* .circleci/pants_config.yml
+            scripts/.* .circleci/pants_config.yml,.circleci/web_config.yml
+            src/web/.* .circleci/web_config.yml
       - path-filtering/set-parameters:
           base-revision: main
-          mapping: |
-            .* pants_config ".circleci/pants_config.yml"
-            src/web/.* pants_config ".circleci/web_config.yml"
-      - debug
-      # - set-continued-config:
-      #     lookup-key: config
+          mapping: /tmp/format-mapping.conf
+      - extract-config-list
+      - run:
+          name: debug
+          command: |
+            cat /tmp/format-mapping.conf
+
+            echo "##############"
+
+            cat /tmp/pipeline-parameters.json
+
+            echo "##############"
+
+            cat /tmp/filtered-config-list.conf
+      - merge-config-list
       - continuation/continue:
-          configuration_path: .circleci/continue.yml
-          parameters: /tmp/pipeline-parameters.json
+          configuration_path: .circleci/continue-config.yml
 
 workflows:
-  setup:
+  generate-configs:
     jobs:
       - filter
