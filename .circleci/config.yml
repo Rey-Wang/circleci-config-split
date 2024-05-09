@@ -12,6 +12,32 @@ commands:
       - run:
           command: |
             cat /tmp/pipeline-parameters.json
+  extract-config-list:
+    parameters:
+      pipeline-parameters-json-file:
+        type: string
+        default: /tmp/pipeline-parameters.json
+      config-list-path:
+        default: /tmp/filtered-config-list
+        description: >
+          A file path to append config paths. Each path in this file should be
+          relative to the working directory.
+        type: string
+    steps:
+      - run:
+          name: Extract config list
+          command: |
+            if [ ! -f <<parameters.pipeline-parameters-json-file>> ]; then
+              echo "Input JSON file does not exist: <<parameters.pipeline-parameters-json-file>>
+              exit 1
+            fi
+
+            # 使用 jq 提取 JSON 文件中的所有值，并逐行输出到输出文件中
+            jq -r '.. | scalars' <<parameters.pipeline-parameters-json-file>> > <<parameters.config-list-path>>
+
+            echo "Values extracted from JSON file and saved to $OUTPUT_FILE"
+
+            cat <<parameters.config-list-path>>
   set-continued-config:
     parameters:
       pipeline-parameters-json-file:
@@ -57,6 +83,8 @@ jobs:
             .* pants_config ".circleci/pants_config.yml"
             src/web/.* web_config ".circleci/web_config.yml"
       - debug
+      - extract-config-list
+      - path-filtering/generate-config
       # - set-continued-config:
       #     lookup-key: config
       - continuation/continue:
