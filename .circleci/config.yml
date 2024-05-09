@@ -51,11 +51,16 @@ commands:
               exit 1
             fi
 
-            values=$(jq -r 'values[]' "$INPUT_JSON_FILE")
+            # Count the number of values in the JSON file
+            num_values=$(jq '. | length' "$INPUT_JSON_FILE")
 
-            if [ $(echo "$values" | wc -l) -gt 1 ]; then
-              values=$(echo "$values" | grep -v '^config_.*')
+            # If there's more than one value, remove the config_.* key
+            if [ "$num_values" -gt 1 ]; then
+              jq 'del(.config_.*)' "$INPUT_JSON_FILE" > temp.json
+              mv temp.json "$INPUT_JSON_FILE"
             fi
+
+            values=$(jq -r 'values[]' "$INPUT_JSON_FILE")
 
             values=$(echo "$values" | tr ',' '\n')
 
