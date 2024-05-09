@@ -101,6 +101,10 @@ jobs:
       - run:
           name: debug
           command: |
+            cat /tmp/format-mapping.conf
+
+            echo "##############"
+
             cat /tmp/pipeline-parameters.json
 
             echo "##############"
