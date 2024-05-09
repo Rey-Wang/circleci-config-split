@@ -5,6 +5,12 @@ setup: true
 orbs:
   path-filtering: circleci/path-filtering@1.0.0
 
+parameters:
+  force-all:
+    description: Emergency valve - forcibly build all the modules
+    type: boolean
+    default: false
+
 commands:
   debug:
     steps:
