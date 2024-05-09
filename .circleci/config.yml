@@ -12,18 +12,29 @@ parameters:
     default: false
 
 commands:
-  debug:
+  format-mapping:
+    parameters:
+      mapping:
+        type: string
+      output_file:
+        type: string
+        default: /tmp/format-mapping.conf
     steps:
       - run:
+          name: Format mapping
           command: |
-            cat /tmp/pipeline-parameters.json
+            ori_mapping=<< parameters.mapping >>
+
+            echo "$ori_mapping" | awk '{print $1 " config_" $1 " " $2}' > << parameters.output_file >>
+
+            cat << parameters.output_file >>
   extract-config-list:
     parameters:
       pipeline-parameters-json-file:
         type: string
         default: /tmp/pipeline-parameters.json
       config-list-path:
-        default: /tmp/filtered-config-list
+        default: /tmp/filtered-config-list.conf
         type: string
     steps:
       - run:
@@ -37,15 +48,17 @@ commands:
               exit 1
             fi
 
-            jq -r '.. | scalars' "$INPUT_JSON_FILE" > "$OUTPUT_FILE"
+            values=$(jq -r 'values[]' "$INPUT_JSON_FILE")
 
-            echo "Values extracted from JSON file and saved to $OUTPUT_FILE"
+            values=$(echo "$values" | tr ',' '\n')
+
+            echo "$values" | sort -u > "$OUTPUT_FILE"
 
             cat "$OUTPUT_FILE"
   merge-config-list:
     parameters:
       config-list-path:
-        default: /tmp/filtered-config-list
+        default: /tmp/filtered-config-list.conf
         type: string
       continue-config:
         type: string
@@ -59,32 +72,37 @@ commands:
 
             cat << parameters.continue-config >>
 
-# jobs:
-#   filter:
-#     docker:
-#       - image: cimg/python:3.9
-#     steps:
-#       - checkout
-#       - path-filtering/filter:
-#           mapping: |
-#             .* params test .circleci/pants_config.yml
-#             src/web/.* params test .circleci/web_config.yml
-      # - run:
-      #     name: Install yq
-      #     command: pip install yq
-      # - path-filtering/set-parameters:
-      #     base-revision: main
-      #     mapping: |
-      #       .* pants_config ".circleci/pants_config.yml"
-      #       src/web/.* web_config ".circleci/web_config.yml"
-      # - debug
-      # - extract-config-list
-      # - merge-config-list
+jobs:
+  filter:
+    docker:
+      - image: cimg/python:3.9
+    steps:
+      - checkout
+      - run:
+          name: Install yq
+          command: pip install yq
+      - format-mapping:
+          mapping: |
+            .* pants_config.yml
+            scripts/.* .circleci/pants_config.yml,.circleci/web_config.yml
+            src/web/.* web_config.yml
+      - path-filtering/set-parameters:
+          base-revision: main
+          mapping: /tmp/format-mapping.conf
+      - extract-config-list
+      - merge-config-list
+      - run:
+          name: debug
+          command: |
+            cat /tmp/pipeline-parameters.json
+
+            echo "##############"
+
+            cat /tmp/filtered-config-list.conf
       # - continuation/continue:
       #     configuration_path: .circleci/continue-config.yml
 
 workflows:
   generate-configs:
     jobs:
-      - path-filtering/filter:
-          mapping: .circleci/mapping.conf
+      - filter
