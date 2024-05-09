@@ -72,8 +72,7 @@ jobs:
       - extract-config-list
       - merge-config-list
       - continuation/continue:
-          configuration_path: .circleci/continue.yml
-          parameters: /tmp/pipeline-parameters.json
+          configuration_path: .circleci/continue-config.yml
 
 workflows:
   setup:
