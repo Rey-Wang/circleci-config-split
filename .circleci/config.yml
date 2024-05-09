@@ -53,6 +53,10 @@ commands:
 
             values=$(jq -r 'values[]' "$INPUT_JSON_FILE")
 
+            if [ $(echo "$values" | wc -l) -gt 1 ]; then
+              values=$(echo "$values" | grep -v '^config_.*')
+            fi
+
             values=$(echo "$values" | tr ',' '\n')
 
             echo "$values" | sort -u > "$OUTPUT_FILE"
