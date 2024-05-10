@@ -116,6 +116,7 @@ jobs:
             cat /tmp/filtered-config-list.conf
       # - merge-config-list
       - path-filtering/generate-config:
+          config-list-path: /tmp/filtered-config-list.conf
           generated-config-path: .circleci/continue-config.yml
       - run:
           name: debug
