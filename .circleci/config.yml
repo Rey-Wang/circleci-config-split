@@ -18,7 +18,7 @@ commands:
       - run:
           name: Format mapping
           command: |
-            mapping="\<< parameters.mapping \>>"
+            mapping="<< parameters.mapping >>"
 
             while IFS= read -r line; do
                 item=$(echo "$line" | awk '{print $1}')
