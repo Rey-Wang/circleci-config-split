@@ -20,29 +20,26 @@ commands:
           command: |
             mapping="<< parameters.mapping >>"
 
-            IFS=$'\n' read -rd '' -a lines <<< "$input_string"
-            first_items=()
-            # 循环处理每一行
-            for line in "${lines[@]}"; do
-                # 使用空格作为分隔符将行拆分为数组
-                IFS=' ' read -ra items <<< "$line"
-                # 获取数组的第一个项目
-                first_item="${items[0]}"
-                # 将第一个项目添加到数组中
-                first_items+=("$first_item")
-            done
+            while IFS= read -r line; do
+                # 获取每一行的第一个项
+                item=$(echo "$line" | awk '{print $1}')
+                # 将项添加到数组中
+                path_regex_list+=("$item")
+            done <<< "$mapping"
 
             rewritten_regex=""
-            for ((i=2; i<=${#first_items[@]}; i++))
+            for ((i=2; i<=${#path_regex_list[@]}; i++))
             do
               rewritten_regex+="(?!${!i})"
             done
 
             rewritten_regex+="$1"
 
-            mapping=${mapping/\.\*/$rewritten_regex}
+            mapping=$(echo "$mapping" | sed '1s/[^ ]*/$rewritten_regex/')
 
+            echo "#########################################"
             echo "$mapping"
+            echo "#########################################"
 
             trim() {
               local var="${1#"${1%%[![:space:]]*}"}"
