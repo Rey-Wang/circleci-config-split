@@ -19,21 +19,25 @@ commands:
           name: Format mapping
           command: |
             mapping="<< parameters.mapping >>"
+            path_regex_list=()
 
             while IFS= read -r line; do
                 item=$(echo "$line" | awk '{print $1}')
                 path_regex_list+=("$item")
-            done \<<< "$mapping"
+            done <<< "$mapping"
 
             rewritten_regex=""
-            for ((i=2; i<=${#path_regex_list[@]}; i++))
+            for ((i=1; i<${#path_regex_list[@]}; i++))
             do
-              rewritten_regex+="(?!${!i})"
+              echo "${path_regex_list[i]}"
+              rewritten_regex+="(?!${path_regex_list[i]})"
             done
 
-            rewritten_regex+="$1"
+            rewritten_regex+="${path_regex_list[0]}"
 
-            mapping=$(echo "$mapping" | sed "1s/[^ ]*/$rewritten_regex/")
+            echo $rewritten_regex
+
+            mapping=$(awk -v change="$rewritten_regex" 'NR==1 {$1 = change} 1' FS=" " OFS=" " <<< "$mapping")
 
             echo "#########################################"
             echo "$mapping"
