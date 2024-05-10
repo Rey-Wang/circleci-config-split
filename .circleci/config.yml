@@ -33,7 +33,7 @@ commands:
 
             rewritten_regex+="$1"
 
-            mapping=$(echo "$mapping" | sed '1s/[^ ]*/$rewritten_regex/')
+            mapping=$(echo "$mapping" | sed "1s/[^ ]*/$rewritten_regex/")
 
             echo "#########################################"
             echo "$mapping"
