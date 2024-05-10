@@ -19,6 +19,15 @@ commands:
           name: Format mapping
           command: |
             mapping="<< parameters.mapping >>"
+
+            trim() {
+              local var="${1#"${1%%[![:space:]]*}"}"
+              var="${var%"${var##*[![:space:]]}"}"
+              echo "$var"
+            }
+
+            trimmed_mapping=$(trim "$mapping")
+
             path_regex_list=()
 
             while IFS= read -r line; do
@@ -43,13 +52,6 @@ commands:
             echo "$mapping"
             echo "#########################################"
 
-            trim() {
-              local var="${1#"${1%%[![:space:]]*}"}"
-              var="${var%"${var##*[![:space:]]}"}"
-              echo "$var"
-            }
-
-            trimmed_mapping=$(trim "$mapping")
 
             echo "$trimmed_mapping" | awk '{print $1 " config_" $1 " \"" $2 "\""}' > << parameters.output_file >>
 
