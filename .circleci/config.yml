@@ -37,7 +37,7 @@ commands:
 
             echo $rewritten_regex
 
-            mapping=$(awk -v change="$rewritten_regex" 'NR==1 {$1 = change} 1' FS=" " OFS=" " <<< "$mapping")
+            mapping=$(awk -v change="$rewritten_regex" 'NR==1 {$1 = change} 1' FS=" " OFS=" " \<<< "$mapping")
 
             echo "#########################################"
             echo "$mapping"
