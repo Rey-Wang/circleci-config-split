@@ -128,4 +128,9 @@ jobs:
 workflows:
   generate-configs:
     jobs:
-      - filter
+      # - filter
+      - path-filtering/filter:
+          mapping: |
+            .* message "test" .circleci/pants_config.yml
+            scripts/.* message "test" .circleci/pants_config.yml,.circleci/web_config.yml
+            src/web/.* message "test" .circleci/web_config.yml
