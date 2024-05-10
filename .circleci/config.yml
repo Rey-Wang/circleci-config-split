@@ -51,6 +51,17 @@ commands:
               exit 1
             fi
 
+            keys=$(jq -r 'keys[]' "$INPUT_JSON_FILE")
+            rewritten_regex=""
+            for ((i=2; i<=${#regex_array[@]}; i++))
+            do
+              rewritten_regex+="(?!${!i})"
+            done
+
+            rewritten_regex+="$1"
+
+            jq '. |= with_entries(if .key == '.*' then .key = "$rewritten_regex" else . end)' "$INPUT_JSON_FILE" > temp.json && mv temp.json "$INPUT_JSON_FILE"
+
             values=$(jq -r 'values[]' "$INPUT_JSON_FILE")
 
             values=$(echo "$values" | tr ',' '\n')
