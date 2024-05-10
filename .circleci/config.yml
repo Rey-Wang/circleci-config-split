@@ -58,32 +58,12 @@ commands:
             echo "$values" | sort -u > "$OUTPUT_FILE"
 
             cat "$OUTPUT_FILE"
-  merge-config-list:
-    parameters:
-      config-list-path:
-        default: /tmp/filtered-config-list.conf
-        type: string
-      continue-config:
-        type: string
-        default: .circleci/continue-config.yml
-    steps:
-      - run:
-          name: Merge config list
-          command: |
-
-            xargs -a "<<parameters.config-list-path>>" yq -y -s 'reduce .[] as $item ({}; . * $item)' | tee "<< parameters.continue-config >>"
-
-            cat << parameters.continue-config >>
 
 jobs:
   filter:
-    docker:
-      - image: cimg/python:3.9
+    executor: path-filtering/default
     steps:
       - checkout
-      - run:
-          name: Install yq
-          command: pip install yq
       - format-mapping:
           mapping: |
             .* .circleci/pants_config.yml
@@ -105,7 +85,13 @@ jobs:
             echo "##############"
 
             cat /tmp/filtered-config-list.conf
-      - merge-config-list
+      - path-filtering/generate-config:
+          config-list-path: /tmp/filtered-config-list.conf
+          generated-config-path: .circleci/continue-config.yml
+      - run:
+          name: debug
+          command: |
+            cat .circleci/continue-config.yml
       - continuation/continue:
           configuration_path: .circleci/continue-config.yml
 
@@ -113,3 +99,8 @@ workflows:
   generate-configs:
     jobs:
       - filter
+      # - path-filtering/filter:
+      #     mapping: |
+      #       .* message "test" .circleci/pants_config.yml
+      #       scripts/.* message "test" .circleci/pants_config.yml,.circleci/web_config.yml
+      #       src/web/.* message "test" .circleci/web_config.yml
