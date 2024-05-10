@@ -114,7 +114,13 @@ jobs:
             echo "##############"
 
             cat /tmp/filtered-config-list.conf
-      - merge-config-list
+      # - merge-config-list
+      - path-filtering/generate-configs:
+          generated-config-path: .circleci/continue-config.yml
+      - run:
+          name: debug
+          command: |
+            cat .circleci/continue-config.yml
       - continuation/continue:
           configuration_path: .circleci/continue-config.yml
 
