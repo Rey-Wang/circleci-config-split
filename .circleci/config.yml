@@ -61,7 +61,7 @@ commands:
   merge-config-list:
     parameters:
       config-list-path:
-        default: /tmp/filtered-config-list
+        default: /tmp/filtered-config-list.conf
         type: string
       continue-config:
         type: string
@@ -110,10 +110,10 @@ jobs:
 
             echo "##############"
 
-            cat /tmp/filtered-config-list
+            cat /tmp/filtered-config-list.conf
       # - merge-config-list
       - path-filtering/generate-config:
-          config-list-path: /tmp/filtered-config-list
+          config-list-path: /tmp/filtered-config-list.conf
           generated-config-path: .circleci/continue-config.yml
       - run:
           name: debug
