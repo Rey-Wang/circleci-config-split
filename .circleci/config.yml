@@ -61,7 +61,7 @@ commands:
   merge-config-list:
     parameters:
       config-list-path:
-        default: /tmp/filtered-config-list.conf
+        default: /tmp/filtered-config-list
         type: string
       continue-config:
         type: string
@@ -90,9 +90,6 @@ jobs:
       - image: cimg/python:3.9
     steps:
       - checkout
-      - run:
-          name: Install yq
-          command: pip install yq
       - format-mapping:
           mapping: |
             .* .circleci/pants_config.yml
@@ -113,10 +110,10 @@ jobs:
 
             echo "##############"
 
-            cat /tmp/filtered-config-list.conf
+            cat /tmp/filtered-config-list
       # - merge-config-list
       - path-filtering/generate-config:
-          config-list-path: /tmp/filtered-config-list.conf
+          config-list-path: /tmp/filtered-config-list
           generated-config-path: .circleci/continue-config.yml
       - run:
           name: debug
@@ -128,9 +125,9 @@ jobs:
 workflows:
   generate-configs:
     jobs:
-      # - filter
-      - path-filtering/filter:
-          mapping: |
-            .* message "test" .circleci/pants_config.yml
-            scripts/.* message "test" .circleci/pants_config.yml,.circleci/web_config.yml
-            src/web/.* message "test" .circleci/web_config.yml
+      - filter
+      # - path-filtering/filter:
+      #     mapping: |
+      #       .* message "test" .circleci/pants_config.yml
+      #       scripts/.* message "test" .circleci/pants_config.yml,.circleci/web_config.yml
+      #       src/web/.* message "test" .circleci/web_config.yml
