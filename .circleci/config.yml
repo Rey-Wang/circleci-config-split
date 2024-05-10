@@ -58,31 +58,6 @@ commands:
             echo "$values" | sort -u > "$OUTPUT_FILE"
 
             cat "$OUTPUT_FILE"
-  merge-config-list:
-    parameters:
-      config-list-path:
-        default: /tmp/filtered-config-list.conf
-        type: string
-      continue-config:
-        type: string
-        default: .circleci/continue-config.yml
-    steps:
-      - run:
-          name: Merge config list
-          command: |
-
-            cat <<parameters.config-list-path>>
-
-            echo "\n###########################"
-
-
-            if [ -f "<< parameters.continue-config >>" ]; then
-              cat << parameters.continue-config >>
-            fi
-
-            xargs -a "<<parameters.config-list-path>>" yq -y -s 'reduce .[] as $item ({}; . * $item)' | tee "<< parameters.continue-config >>"
-
-            cat << parameters.continue-config >>
 
 jobs:
   filter:
@@ -111,7 +86,6 @@ jobs:
             echo "##############"
 
             cat /tmp/filtered-config-list.conf
-      # - merge-config-list
       - path-filtering/generate-config:
           config-list-path: /tmp/filtered-config-list.conf
           generated-config-path: .circleci/continue-config.yml
