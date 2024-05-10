@@ -71,6 +71,12 @@ commands:
           name: Merge config list
           command: |
 
+            cat <<parameters.config-list-path>>
+
+            echo "\n###########################"
+
+            cat << parameters.continue-config >
+
             xargs -a "<<parameters.config-list-path>>" yq -y -s 'reduce .[] as $item ({}; . * $item)' | tee "<< parameters.continue-config >>"
 
             cat << parameters.continue-config >>
