@@ -23,7 +23,7 @@ commands:
             while IFS= read -r line; do
                 item=$(echo "$line" | awk '{print $1}')
                 path_regex_list+=("$item")
-            done <<< "$mapping"
+            done \<<< "$mapping"
 
             rewritten_regex=""
             for ((i=2; i<=${#path_regex_list[@]}; i++))
