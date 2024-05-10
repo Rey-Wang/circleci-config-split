@@ -61,7 +61,7 @@ commands:
 
 jobs:
   filter:
-    executor: path-filtering/executor
+    executor: path-filtering/default
     steps:
       - checkout
       - format-mapping:
