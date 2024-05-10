@@ -75,7 +75,10 @@ commands:
 
             echo "\n###########################"
 
-            cat << parameters.continue-config >>
+
+            if [ -f "<< parameters.continue-config >>" ]; then
+              cat << parameters.continue-config >>
+            fi
 
             xargs -a "<<parameters.config-list-path>>" yq -y -s 'reduce .[] as $item ({}; . * $item)' | tee "<< parameters.continue-config >>"
 
