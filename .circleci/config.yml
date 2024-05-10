@@ -33,7 +33,7 @@ commands:
             while IFS= read -r line; do
                 item=$(echo "$line" | awk '{print $1}')
                 path_regex_list+=("$item")
-            done \<<< "$mapping"
+            done \<<< "$trimmed_mapping"
 
             rewritten_regex=""
             for ((i=1; i<${#path_regex_list[@]}; i++))
@@ -46,10 +46,10 @@ commands:
 
             echo $rewritten_regex
 
-            mapping=$(awk -v change="$rewritten_regex" 'NR==1 {$1 = change} 1' FS=" " OFS=" " \<<< "$mapping")
+            trimmed_mapping=$(awk -v change="$rewritten_regex" 'NR==1 {$1 = change} 1' FS=" " OFS=" " \<<< "$trimmed_mapping")
 
             echo "#########################################"
-            echo "$mapping"
+            echo "$trimmed_mapping"
             echo "#########################################"
 
 
