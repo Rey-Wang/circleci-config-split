@@ -61,8 +61,7 @@ commands:
 
 jobs:
   filter:
-    docker:
-      - image: cimg/python:3.9
+    executor: path-filtering/executor
     steps:
       - checkout
       - format-mapping:
