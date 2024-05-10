@@ -18,12 +18,10 @@ commands:
       - run:
           name: Format mapping
           command: |
-            mapping="<< parameters.mapping >>"
+            mapping="\<< parameters.mapping \>>"
 
             while IFS= read -r line; do
-                # 获取每一行的第一个项
                 item=$(echo "$line" | awk '{print $1}')
-                # 将项添加到数组中
                 path_regex_list+=("$item")
             done <<< "$mapping"
 
