@@ -28,3 +28,5 @@ mapping=$(awk -v change="$rewritten_regex" 'NR==1 {$1 = change} 1' FS=" " OFS=" 
 echo "#########################################"
 echo "$mapping"
 echo "#########################################"
+
+#  test change scripts
