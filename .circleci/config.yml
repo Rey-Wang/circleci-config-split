@@ -28,6 +28,31 @@ commands:
 
             trimmed_mapping=$(trim "$mapping")
 
+            path_regex_list=()
+
+            while IFS= read -r line; do
+                item=$(echo "$line" | awk '{print $1}')
+                path_regex_list+=("$item")
+            done \<<< "$trimmed_mapping"
+
+            rewritten_regex=""
+            for ((i=1; i<${#path_regex_list[@]}; i++))
+            do
+              echo "${path_regex_list[i]}"
+              rewritten_regex+="(?!${path_regex_list[i]})"
+            done
+
+            rewritten_regex+="${path_regex_list[0]}"
+
+            echo $rewritten_regex
+
+            trimmed_mapping=$(awk -v change="$rewritten_regex" 'NR==1 {$1 = change} 1' FS=" " OFS=" " \<<< "$trimmed_mapping")
+
+            echo "#########################################"
+            echo "$trimmed_mapping"
+            echo "#########################################"
+
+
             echo "$trimmed_mapping" | awk '{print $1 " config_" $1 " \"" $2 "\""}' > << parameters.output_file >>
 
             cat << parameters.output_file >>
